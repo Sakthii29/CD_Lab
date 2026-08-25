@@ -1,0 +1,61 @@
+PROGRAM:
+cal.l
+%{
+#include &quot;cal.tab.h&quot;
+%}
+DIGIT [0-9]+
+%option noyywrap
+%%
+{DIGIT} { yylval = atof(yytext); return NUM; }
+\n|. { return yytext[0]; }
+%%
+cal.y
+%{
+#include &lt;ctype.h&gt;
+#include &lt;stdio.h&gt;
+#define YYSTYPE double
+%}
+%token NUM
+%left &#39;+&#39; &#39;-&#39;
+%left &#39;*&#39; &#39;/&#39;
+%right UMINUS
+%%
+Statment: E { printf(&quot;Answer: %g \n&quot;, $$); }
+| Statment &#39;\n&#39;
+;
+E : E &#39;+&#39; E { $$ = $1 + $3; }
+| E &#39;-&#39; E { $$ = $1 - $3; }
+| E &#39;*&#39; E { $$ = $1 * $3; }
+
+| E &#39;/&#39; E { $$ = $1 / $3; }
+| NUM
+;
+%%
+int main() {
+printf(&quot;Enter the expression:\n&quot;);
+yyparse();
+return 0;
+}
+int yyerror(char *s) {
+printf(&quot;%s\n&quot;, s);
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT:
+$ flex cal.l
+$ bison -d cal.y
+$ gcc lex.yy.c cal.tab.c -o calc -lfl
+$ ./calc
+Enter the expression:
+2+2
+Answer: 4

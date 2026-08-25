@@ -1,0 +1,66 @@
+PROGRAM:
+lexer.l
+%{
+#include &lt;stdio.h&gt;
+%}
+KEYWORD int|float|char|double|void|for|while|if|else|return|struct|switch|case|break|do
+%%
+&quot;#include&quot; { printf(&quot;Preprocessor Directive : %s\n&quot;, yytext); }
+&quot;&lt;&quot;[a-zA-Z.]+&quot;&gt;&quot; { printf(&quot;Header File : %s\n&quot;, yytext); }
+{KEYWORD} { printf(&quot;Keyword : %s\n&quot;, yytext); }
+[a-zA-Z_][a-zA-Z0-9_]* { printf(&quot;Identifier : %s\n&quot;, yytext); }
+[0-9]+ { printf(&quot;Number : %s\n&quot;, yytext); }
+&quot;==&quot;|&quot;&lt;=&quot;|&quot;&gt;=&quot; { printf(&quot;Operator : %s\n&quot;, yytext); }
+&quot;+&quot;|&quot;-&quot;|&quot;*&quot;|&quot;/&quot;|&quot;=&quot;|&quot;&lt;&quot;|&quot;&gt;&quot; { printf(&quot;Operator : %s\n&quot;, yytext); }
+[(){};,] { printf(&quot;Delimiter : %s\n&quot;, yytext); }
+[ \t\n] { /* skip whitespace */ }
+. { /* ignore rest */ }
+%%
+int yywrap() { return 1; }
+int main(int argc, char *argv[]) {
+if (argc &lt; 2) {
+printf(&quot;Usage: %s &lt;input file&gt;\n&quot;, argv[0]);
+return 1;
+}
+yyin = fopen(argv[1], &quot;r&quot;);
+yylex();
+printf(&quot;\nEnd of file\n&quot;);
+return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+OUTPUT:
+$ flex lexer.l
+$ gcc lex.yy.c -o lexer -lfl
+$ cat iplex.c
+#include&lt;stdio.h&gt;
+void main()
+{
+int x;
+x = 10;
+}
+$ ./lexer iplex.c
+Preprocessor Directive : #include
+Header File : &lt;stdio.h&gt;
+Keyword : void
+Identifier : main
+Delimiter : (
+Delimiter : )
+Delimiter : {
+Keyword : int
+Identifier : x
+Delimiter : ;
+Identifier : x
+Operator : =
+Number : 10
+Delimiter : ;
+Delimiter : }
